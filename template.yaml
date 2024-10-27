@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Subnet IP Address Monitoring and Alerting
+
+Parameters:
+  VpcId:
+    Type: String
+    Description: The ID of the VPC to monitor
+    Default: vpc-05e6b1018a17db2fe
+  SubnetIds:
+    Type: CommaDelimitedList
+    Description: Comma-separated list of subnet IDs to monitor
+    Default: subnet-0b0b4a23937337665,subnet-0bddf67afc513f1fd
+  SubnetName1:
+    Type: String
+    Description: Name of the first subnet
+    Default: private_subnet_a
+  SubnetName2:
+    Type: String
+    Description: Name of the second subnet
+    Default: private_subnet_b
+  CWMetericNamespace:
+    Type: String
+    Description: The CloudWatch metric namespace
+    Default: IPAddressUtilizationInSubnets
+  AlertEmail:
+    Type: String
+    Description: Email address to receive alerts
+    Default: hello@awsfanboy.com
+
+Globals:
+  Function:
+    Timeout: 300
+    Runtime: python3.12
+
+Resources:
+  SubnetMonitorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./src
+      Handler: lambda_function.lambda_handler
+      MemorySize: 256
+      Environment:
+        Variables:
+          VPC_ID: !Ref VpcId
+          SUBNET_IDS: !Join
+            - ','
+            - !Ref SubnetIds
+          NAMESPACE: !Ref CWMetericNamespace
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - ec2:DescribeSubnets
+                - cloudwatch:PutMetricData
+              Resource: '*'
+
+  SubnetMonitorSchedule:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: rate(1 minute)
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt SubnetMonitorFunction.Arn
+          Id: SubnetMonitorSchedule
+
+  SubnetMonitorPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SubnetMonitorFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt SubnetMonitorSchedule.Arn
+
+  SubnetAlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: Subnet IP Utilization Alert
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref AlertEmail
+
+  SubnetUtilizationAlarm1:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub SubnetIPUtilizationAlert-${SubnetName1}
+      AlarmDescription: !Sub ${SubnetName1} IP utilization exceeds 50% in ${AWS::Region}
+      Namespace: !Ref CWMetericNamespace
+      MetricName: IPUtilizationPercentage
+      Dimensions:
+        - Name: SubnetId
+          Value: !Select
+            - 0
+            - !Ref SubnetIds
+        - Name: SubnetName
+          Value: !Ref SubnetName1
+      Statistic: Maximum
+      Period: 20
+      EvaluationPeriods: 3
+      DatapointsToAlarm: 2
+      Threshold: 50
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: ignore
+      AlarmActions:
+        - !Ref SubnetAlertTopic
+
+  SubnetUtilizationAlarm2:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub SubnetIPUtilizationAlert-${SubnetName2}
+      AlarmDescription: !Sub ${SubnetName2} IP utilization exceeds 50% in ${AWS::Region}
+      Namespace: !Ref CWMetericNamespace
+      MetricName: IPUtilizationPercentage
+      Dimensions:
+        - Name: SubnetId
+          Value: !Select
+            - 1
+            - !Ref SubnetIds
+        - Name: SubnetName
+          Value: !Ref SubnetName2
+      Statistic: Maximum
+      Period: 20
+      EvaluationPeriods: 3
+      DatapointsToAlarm: 2
+      Threshold: 50
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: ignore
+      AlarmActions:
+        - !Ref SubnetAlertTopic
+
+Outputs:
+  SubnetMonitorFunction:
+    Description: Subnet Monitor Lambda Function ARN
+    Value: !GetAtt SubnetMonitorFunction.Arn
+  SubnetAlertTopic:
+    Description: SNS Topic ARN for Subnet Alerts
+    Value: !Ref SubnetAlertTopic
