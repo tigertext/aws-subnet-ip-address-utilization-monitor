@@ -6,11 +6,11 @@ Parameters:
   VpcId:
     Type: String
     Description: The ID of the VPC to monitor
-    Default: vpc-05e6b1018a17db2fe
+    Default: vpc-xxxxxxxxx
   SubnetIds:
     Type: CommaDelimitedList
     Description: Comma-separated list of subnet IDs to monitor
-    Default: subnet-0b0b4a23937337665,subnet-0bddf67afc513f1fd
+    Default: subnet-xxxxxxxx,subnet-xxxxxxxx
   SubnetName1:
     Type: String
     Description: Name of the first subnet
