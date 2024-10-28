@@ -2,6 +2,8 @@
 
 This project uses AWS SAM (Serverless Application Model) to deploy a solution that monitors IP address utilization in specified subnets and sends alerts when utilization exceeds a threshold.
 
+You can find the full article here : https://dev.to/aws-heroes/use-amazon-q-developer-and-aws-infrastructure-composer-to-automate-the-monitoring-of-available-ip-addresses-in-subnets-1hip
+
 ![Subnet IP Address Monitoring and Alerting](./architecture.png)
 
 ## Prerequisites
