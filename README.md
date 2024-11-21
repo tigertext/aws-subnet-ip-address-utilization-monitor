@@ -1,4 +1,4 @@
-# AWS VPC - Subnet IP Address Monitoring and Alerting
+# Monitoring of Available IPs in AWS VPC Subnets
 
 This project uses AWS SAM (Serverless Application Model) to deploy a solution that monitors IP address utilization in specified subnets and sends alerts when utilization exceeds a threshold.
 
