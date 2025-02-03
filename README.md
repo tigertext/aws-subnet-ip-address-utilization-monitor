@@ -90,3 +90,14 @@ Follow the prompts to confirm the deletion of resources.
 ## Support
 
 For any issues or questions, please open an issue in the GitHub repository.
+
+
+## Deployment at TC
+
+This has been deployed in env7 and prod using following commands
+
+### env7
+env AWS_PROFILE=dev sam deploy --guided --config-file samconfig-env7.toml --config-env env7
+
+### prod
+env AWS_PROFILE=prod sam deploy --guided --config-file samconfig-prod.toml --config-env prod

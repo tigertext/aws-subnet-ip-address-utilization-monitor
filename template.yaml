@@ -19,14 +19,14 @@ Parameters:
     Type: String
     Description: Name of the second subnet
     Default: private_subnet_b
+  SubnetName3:
+    Type: String
+    Description: Name of the second subnet
+    Default: private_subnet_c
   CWMetericNamespace:
     Type: String
     Description: The CloudWatch metric namespace
     Default: IPAddressUtilizationInSubnets
-  AlertEmail:
-    Type: String
-    Description: Email address to receive alerts
-    Default: hello@awsfanboy.com
 
 Globals:
   Function:
@@ -77,9 +77,6 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       DisplayName: Subnet IP Utilization Alert
-      Subscription:
-        - Protocol: email
-          Endpoint: !Ref AlertEmail
 
   SubnetUtilizationAlarm1:
     Type: AWS::CloudWatch::Alarm
@@ -96,10 +93,10 @@ Resources:
         - Name: SubnetName
           Value: !Ref SubnetName1
       Statistic: Maximum
-      Period: 20
+      Period: 60
       EvaluationPeriods: 3
       DatapointsToAlarm: 2
-      Threshold: 50
+      Threshold: 90
       ComparisonOperator: GreaterThanThreshold
       TreatMissingData: ignore
       AlarmActions:
@@ -120,10 +117,34 @@ Resources:
         - Name: SubnetName
           Value: !Ref SubnetName2
       Statistic: Maximum
-      Period: 20
+      Period: 60
       EvaluationPeriods: 3
       DatapointsToAlarm: 2
-      Threshold: 50
+      Threshold: 90
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: ignore
+      AlarmActions:
+        - !Ref SubnetAlertTopic
+
+  SubnetUtilizationAlarm3:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub SubnetIPUtilizationAlert-${SubnetName3}
+      AlarmDescription: !Sub ${SubnetName3} IP utilization exceeds 50% in ${AWS::Region}
+      Namespace: !Ref CWMetericNamespace
+      MetricName: IPUtilizationPercentage
+      Dimensions:
+        - Name: SubnetId
+          Value: !Select
+            - 2
+            - !Ref SubnetIds
+        - Name: SubnetName
+          Value: !Ref SubnetName3
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 3
+      DatapointsToAlarm: 2
+      Threshold: 90
       ComparisonOperator: GreaterThanThreshold
       TreatMissingData: ignore
       AlarmActions:

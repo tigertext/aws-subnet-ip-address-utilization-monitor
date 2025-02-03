@@ -1,0 +1,11 @@
+version = 0.1
+[prod.deploy.parameters]
+stack_name = "subnet-util-prod"
+resolve_s3 = true
+s3_prefix = "subnet-util-prod"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = "VpcId=\"vpc-7176571f\" SubnetIds=\"subnet-1a54166c,subnet-4476572a,subnet-0fef2bfdd8444c8ab\" SubnetName1=\"private-production-a\" SubnetName2=\"private-production-b\" SubnetName3=\"private-production-c\" CWMetericNamespace=\"IPAddressUtilizationInSubnets\""
+image_repositories = []

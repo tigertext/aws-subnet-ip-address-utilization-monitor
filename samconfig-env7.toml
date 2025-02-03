@@ -1,0 +1,11 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "subnet-util-env7"
+resolve_s3 = true
+s3_prefix = "subnet-util-env7"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = "VpcId=\"vpc-b54bbecf\" SubnetIds=\"subnet-0f6f1945,subnet-0012233ffc41d15b1,subnet-0fdca2774263f5e2d\" SubnetName1=\"private-env7-a\" SubnetName2=\"private-env7-b\" SubnetName3=\"private-env7-c\" CWMetericNamespace=\"IPAddressUtilizationInSubnets\""
+image_repositories = []
